@@ -1,0 +1,22 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Docker@2
+  inputs:
+    containerRegistry: 'myacr3641'  # Name of your Azure Container Registry service connection
+    repository: 'myacr3641.azurecr.io/nginx'  # Path to your NGINX image in ACR
+    command: 'push'
+    tags: 'latest'
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: '6f627a1f-8b73-4c31-9b9f-0bb770870e6e'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az aks get-credentials --resource-group aks_tf_rg --name my-aks-cluster --overwrite-existing
+      kubectl apply -f nginx-deployment.yaml  # Assuming you have a deployment YAML file for NGINX
